@@ -194,5 +194,12 @@ public class PlayerMove : MonoBehaviour
         boxCollider.enabled = false;
         // 사망 이펙트
         rigid.AddForce(Vector2.up * 5, ForceMode2D.Impulse);
+
+        Debug.Log("게임 끝!");
+    }
+
+    public void VelocityZero()
+    {
+        rigid.velocity = Vector2.zero;
     }
 }
