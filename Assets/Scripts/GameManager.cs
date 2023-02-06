@@ -7,12 +7,15 @@ public class GameManager : MonoBehaviour
     public int totalPoint;
     public int stagePoint;
     public int stageIndex;
-    public int health = 5;
+    public int health;
 
     public PlayerMove player;
 
     // Start is called before the first frame update
-    void Start() { }
+    void Awake()
+    {
+        health = 5;
+    }
 
     // Update is called once per frame
     void Update() { }
