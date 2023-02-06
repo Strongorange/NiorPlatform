@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class PlayerMove : MonoBehaviour
 {
-    public float maxSpeed;
+    public float maxSpeed = 20;
+    public float jumpPower = 10;
     Rigidbody2D rigid;
     SpriteRenderer spriteRenderer;
     Animator animator;
@@ -17,8 +18,19 @@ public class PlayerMove : MonoBehaviour
     }
 
     // Update is called once per frame
-    // 일반적인 키 입력
+    // 단발적인 일반적인 키 입력
     void Update() {
+        //점프
+        if(Input.GetButtonDown("Jump") && !animator.GetBool("isJumping")) {
+            rigid.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
+            animator.SetBool("isJumping", true);
+        }
+        
+        // 방향 전환
+        if(Input.GetButtonDown("Horizontal")) {
+            spriteRenderer.flipX = Input.GetAxisRaw("Horizontal") == -1;
+        }
+
         // 손 땟을때 자동으로 멈추게
         if(Input.GetButtonUp("Horizontal")) {
             rigid.velocity = new Vector2(rigid.velocity.normalized.x * 0.5f, rigid.velocity.y);
@@ -52,5 +64,21 @@ public class PlayerMove : MonoBehaviour
             //왼쪽 최대속력
             rigid.velocity = new Vector2(maxSpeed * (-1), rigid.velocity.y);
         }
+
+        // Landing Platform
+        // 하강시에만 Ray 발사
+        if(rigid.velocity.y < 0) {
+            Debug.DrawRay(rigid.position, Vector2.down, new Color(1,0,0)); 
+            RaycastHit2D rayHit = Physics2D.Raycast(rigid.position, Vector2.down, 1, LayerMask.GetMask("Platform"));
+            if(rayHit.collider != null) {
+            // Ray 는 Player 가운데서 나옴 , 플레이어 크기는 1
+                if(rayHit.distance < 0.5f) {
+                    animator.SetBool("isJumping", false);
+                }
+            }
+        }
+        
     }
+
+
 }
