@@ -4,11 +4,14 @@ using UnityEngine;
 
 public class PlayerMove : MonoBehaviour
 {
+    public GameManager gameManager;
     public float maxSpeed = 20;
     public float jumpPower = 10;
     Rigidbody2D rigid;
     SpriteRenderer spriteRenderer;
     Animator animator;
+
+    BoxCollider2D boxCollider;
 
     private const int playerLayer = 10;
     private const int plyaerDamagedLayer = 11;
@@ -19,6 +22,7 @@ public class PlayerMove : MonoBehaviour
         rigid = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
+        boxCollider = GetComponent<BoxCollider2D>();
     }
 
     // Update is called once per frame
@@ -100,12 +104,23 @@ public class PlayerMove : MonoBehaviour
     {
         if (collision.gameObject.tag == "Enemy")
         {
-            OnDamaged(collision.transform.position);
+            // 공격
+            if (rigid.velocity.y < 0 && transform.position.y > collision.transform.position.y)
+            {
+                OnAttack(collision.transform);
+            }
+            else
+            {
+                OnDamaged(collision.transform.position);
+            }
         }
     }
 
     void OnDamaged(Vector2 targetPosition)
     {
+        // 체력 깎임
+        gameManager.HealthDown();
+        // 무적
         gameObject.layer = plyaerDamagedLayer;
         spriteRenderer.color = new Color(1, 1, 1, 0.4f);
 
@@ -119,10 +134,65 @@ public class PlayerMove : MonoBehaviour
         Invoke("OffDamaged", 3);
     }
 
+    void OnAttack(Transform enemy)
+    {
+        // 점수
+        gameManager.stagePoint += 100;
+        // 반발력
+        rigid.AddForce(Vector2.up * 10, ForceMode2D.Impulse);
+
+        // 적 물리침
+        EnemyController enemyController = enemy.GetComponent<EnemyController>();
+        enemyController.OnDamaged();
+    }
+
     void OffDamaged()
     {
         // 레이어 바꿔서 무적 표현
         gameObject.layer = playerLayer;
         spriteRenderer.color = new Color(1, 1, 1, 1);
+    }
+
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "Item")
+        {
+            bool isBronze = collision.gameObject.name.Contains("Bronze");
+            bool isSilver = collision.gameObject.name.Contains("Silver");
+            bool isGold = collision.gameObject.name.Contains("Gold");
+            // Point
+            if (isBronze)
+            {
+                gameManager.stagePoint += 50;
+            }
+            else if (isSilver)
+            {
+                gameManager.stagePoint += 100;
+            }
+            else if (isGold)
+            {
+                gameManager.stagePoint += 300;
+            }
+
+            // Destory
+            collision.gameObject.SetActive(false);
+        }
+        else if (collision.gameObject.tag == "Finish")
+        {
+            // 스테이지 이동
+            gameManager.NextStage();
+        }
+    }
+
+    public void OnDie()
+    {
+        // 스프라이트 투명도 (알파)
+        spriteRenderer.color = new Color(1, 1, 1, 0.4f);
+        // 스프라이트 플립 Y
+        spriteRenderer.flipY = true;
+        // Collider Disable
+        boxCollider.enabled = false;
+        // 사망 이펙트
+        rigid.AddForce(Vector2.up * 5, ForceMode2D.Impulse);
     }
 }

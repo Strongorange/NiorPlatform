@@ -7,6 +7,7 @@ public class EnemyController : MonoBehaviour
     Rigidbody2D rigid;
     Animator animator;
     SpriteRenderer spriteRenderer;
+    BoxCollider2D collider;
     public int nextMove;
     public int invokeTime = 5;
 
@@ -16,6 +17,7 @@ public class EnemyController : MonoBehaviour
         rigid = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        collider = GetComponent<BoxCollider2D>();
         Think();
     }
 
@@ -64,5 +66,24 @@ public class EnemyController : MonoBehaviour
         spriteRenderer.flipX = nextMove == 1;
         CancelInvoke();
         Invoke("Think", 4);
+    }
+
+    public void OnDamaged()
+    {
+        // 스프라이트 투명도 (알파)
+        spriteRenderer.color = new Color(1, 1, 1, 0.4f);
+        // 스프라이트 플립 Y
+        spriteRenderer.flipY = true;
+        // Collider Disable
+        collider.enabled = false;
+        // 사망 이펙트
+        rigid.AddForce(Vector2.up * 5, ForceMode2D.Impulse);
+        // Destroy
+        Invoke("Deactive", 4);
+    }
+
+    void Deactive()
+    {
+        gameObject.SetActive(false);
     }
 }
