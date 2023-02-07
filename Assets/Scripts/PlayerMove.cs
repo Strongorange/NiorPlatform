@@ -41,35 +41,11 @@ public class PlayerMove : MonoBehaviour
     // 단발적인 일반적인 키 입력
     void Update()
     {
-        //점프
-        if (Input.GetButtonDown("Jump") && !animator.GetBool("isJumping"))
-        {
-            PlayerJump();
-        }
-
-        // 손 땟을때 자동으로 멈추게
-        if (Input.GetButtonUp("Horizontal"))
-        {
-            rigid.velocity = new Vector2(rigid.velocity.normalized.x * 0.5f, rigid.velocity.y);
-        }
-
-        // 방향 전환
-        if (Input.GetButton("Horizontal"))
-        {
-            spriteRenderer.flipX = Input.GetAxisRaw("Horizontal") == -1;
-        }
-
-        // 애니메이션
-        if (Mathf.Abs(rigid.velocity.x) < 0.3)
-        {
-            // 멈춘 상태
-            animator.SetBool("isWalking", false);
-        }
-        else
-        {
-            // 움직이고 있는 상태
-            animator.SetBool("isWalking", true);
-        }
+        //점프, 키보드
+        // if (Input.GetButtonDown("Jump") && !animator.GetBool("isJumping"))
+        // {
+        //     PlayerJump();
+        // }
 
         // 터치로 움직임
         if (Input.touchCount > 0)
@@ -77,6 +53,8 @@ public class PlayerMove : MonoBehaviour
             Touch touch = Input.GetTouch(0);
             if (touch.position.x > Screen.width / 2)
             {
+                // 스프라이트 오른쪽으로
+                spriteRenderer.flipX = false;
                 // 플레이어 점프
                 // FIXME: 왼쪽이랑 코드가 중복됨
                 if (touch.phase == TouchPhase.Began)
@@ -87,8 +65,8 @@ public class PlayerMove : MonoBehaviour
                 {
                     Vector2 touchEndPos = touch.position;
                     float swipeDistance = (touchEndPos - touchStartPos).magnitude;
-                    Debug.Log(swipeDistance);
-                    if (swipeDistance > 50)
+
+                    if (swipeDistance > 100)
                     {
                         if (!animator.GetBool("isJumping"))
                         {
@@ -96,18 +74,21 @@ public class PlayerMove : MonoBehaviour
                         }
                     }
                 }
+
+                // 움직임 제어
                 if (
                     touch.phase == TouchPhase.Began
                     || touch.phase == TouchPhase.Moved
                     || touch.phase == TouchPhase.Stationary
                 )
                 {
-                    Debug.Log("Right side of screen");
-                    rigid.AddForce(Vector2.right * 1.0f, ForceMode2D.Impulse);
+                    rigid.AddForce(Vector2.right, ForceMode2D.Impulse);
                 }
             }
             else
             {
+                // 왼쪽으로 움직임
+                spriteRenderer.flipX = true;
                 // 플레이어 점프
                 if (touch.phase == TouchPhase.Began)
                 {
@@ -117,7 +98,7 @@ public class PlayerMove : MonoBehaviour
                 {
                     Vector2 touchEndPos = touch.position;
                     float swipeDistance = (touchEndPos - touchStartPos).magnitude;
-                    Debug.Log(swipeDistance);
+
                     if (swipeDistance > 50)
                     {
                         if (!animator.GetBool("isJumping"))
@@ -126,25 +107,19 @@ public class PlayerMove : MonoBehaviour
                         }
                     }
                 }
+
+                // 움직임 제어
                 if (
                     touch.phase == TouchPhase.Began
                     || touch.phase == TouchPhase.Moved
                     || touch.phase == TouchPhase.Stationary
                 )
                 {
-                    Debug.Log("Left side of screen");
-                    rigid.AddForce(Vector2.left * 1.0f, ForceMode2D.Impulse);
+                    rigid.AddForce(Vector2.left, ForceMode2D.Impulse);
                 }
             }
         }
-    }
 
-    // FixedUpdate 는 물리계산같은게 들어갈때
-    void FixedUpdate()
-    {
-        // 오른쪽 왼쪽 움직임 제어
-        float h = Input.GetAxisRaw("Horizontal");
-        rigid.AddForce(Vector2.right * h, ForceMode2D.Impulse);
         if (rigid.velocity.x > maxSpeed)
         {
             // 오른쪽 최대속력
@@ -170,12 +145,45 @@ public class PlayerMove : MonoBehaviour
             if (rayHit.collider != null)
             {
                 // Ray 는 Player 가운데서 나옴 , 플레이어 크기는 1
-                if (rayHit.distance < 0.5f)
+                if (rayHit.distance < 0.8f)
                 {
                     animator.SetBool("isJumping", false);
                 }
             }
         }
+
+        // //손 땟을때 자동으로 멈추게, 키보드
+        // if (Input.GetButtonUp("Horizontal"))
+        // {
+        //     rigid.velocity = new Vector2(rigid.velocity.normalized.x * 0.5f, rigid.velocity.y);
+        // }
+
+        // 방향 전환
+        // if (Input.GetButton("Horizontal"))
+        // {
+        //     spriteRenderer.flipX = Input.GetAxisRaw("Horizontal") == -1;
+        // }
+
+        // 애니메이션
+        if (Mathf.Abs(rigid.velocity.x) < 0.3)
+        {
+            // 멈춘 상태
+            animator.SetBool("isWalking", false);
+        }
+        else
+        {
+            // 움직이고 있는 상태
+            animator.SetBool("isWalking", true);
+        }
+    }
+
+    // FixedUpdate 는 물리계산같은게 들어갈때
+    void FixedUpdate()
+    {
+        // 오른쪽 왼쪽 움직임 제어
+        // 움직임 제어, 키보드
+        // float h = Input.GetAxisRaw("Horizontal");
+        // rigid.AddForce(Vector2.right * h, ForceMode2D.Impulse);
     }
 
     void OnCollisionEnter2D(Collision2D collision)
