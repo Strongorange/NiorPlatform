@@ -1,23 +1,21 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraResizer : MonoBehaviour
 {
-    private Camera camera;
-
-    private void Start()
+    private void Update()
     {
-        camera = GetComponent<Camera>();
+        float aspectRatio = Screen.width / Screen.height;
+        Camera camera = GetComponent<Camera>();
 
-        float aspectRatio = (float)Screen.width / (float)Screen.height;
-        float cameraSize = camera.orthographicSize;
-
-        if (aspectRatio < 1)
+        if (aspectRatio >= 1)
         {
-            cameraSize = 10;
+            // 가로모드
+            camera.orthographicSize = 5;
         }
-
-        camera.orthographicSize = cameraSize;
+        else
+        {
+            // 세로모드
+            camera.orthographicSize = 10;
+        }
     }
 }

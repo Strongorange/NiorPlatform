@@ -5,13 +5,22 @@ using UnityEngine;
 public class PlayerMove : MonoBehaviour
 {
     public GameManager gameManager;
-    public float maxSpeed = 20;
-    public float jumpPower = 10;
+    AudioSource audioSource;
+
+    // 오디오
+    public AudioClip audioJump;
+    public AudioClip audioAttack;
+    public AudioClip audioDamaged;
+    public AudioClip audioItem;
+    public AudioClip audioDie;
+    public AudioClip audioFinish;
     Rigidbody2D rigid;
     SpriteRenderer spriteRenderer;
     Animator animator;
 
     BoxCollider2D boxCollider;
+    public float maxSpeed = 20;
+    public float jumpPower = 10;
 
     private const int playerLayer = 10;
     private const int plyaerDamagedLayer = 11;
@@ -23,6 +32,7 @@ public class PlayerMove : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
         boxCollider = GetComponent<BoxCollider2D>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -34,6 +44,7 @@ public class PlayerMove : MonoBehaviour
         {
             rigid.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
             animator.SetBool("isJumping", true);
+            PlaySound("JUMP");
         }
 
         // 손 땟을때 자동으로 멈추게
@@ -114,6 +125,11 @@ public class PlayerMove : MonoBehaviour
                 OnDamaged(collision.transform.position);
             }
         }
+
+        if (collision.gameObject.tag == "Spike")
+        {
+            OnDamaged(collision.transform.position);
+        }
     }
 
     void OnDamaged(Vector2 targetPosition)
@@ -130,6 +146,7 @@ public class PlayerMove : MonoBehaviour
 
         // 애니메이션
         animator.SetTrigger("Damaged");
+        PlaySound("DAMAGED");
 
         Invoke("OffDamaged", 3);
     }
@@ -140,6 +157,8 @@ public class PlayerMove : MonoBehaviour
         gameManager.stagePoint += 100;
         // 반발력
         rigid.AddForce(Vector2.up * 10, ForceMode2D.Impulse);
+        // 사운드 재생
+        PlaySound("ATTACK");
 
         // 적 물리침
         EnemyController enemyController = enemy.GetComponent<EnemyController>();
@@ -155,6 +174,7 @@ public class PlayerMove : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collision)
     {
+        // 아이템 획득
         if (collision.gameObject.tag == "Item")
         {
             bool isBronze = collision.gameObject.name.Contains("Bronze");
@@ -176,11 +196,15 @@ public class PlayerMove : MonoBehaviour
 
             // Destory
             collision.gameObject.SetActive(false);
+            // 사운드 재생
+            PlaySound("ITEM");
         }
         else if (collision.gameObject.tag == "Finish")
         {
             // 스테이지 이동
             gameManager.NextStage();
+            // 사운드 재생
+            PlaySound("FINISH");
         }
     }
 
@@ -194,6 +218,7 @@ public class PlayerMove : MonoBehaviour
         boxCollider.enabled = false;
         // 사망 이펙트
         rigid.AddForce(Vector2.up * 5, ForceMode2D.Impulse);
+        PlaySound("DIE");
 
         Debug.Log("게임 끝!");
     }
@@ -201,5 +226,31 @@ public class PlayerMove : MonoBehaviour
     public void VelocityZero()
     {
         rigid.velocity = Vector2.zero;
+    }
+
+    void PlaySound(string action)
+    {
+        switch (action)
+        {
+            case "JUMP":
+                audioSource.clip = audioJump;
+                break;
+            case "ATTACK":
+                audioSource.clip = audioAttack;
+                break;
+            case "DAMAGED":
+                audioSource.clip = audioDamaged;
+                break;
+            case "ITEM":
+                audioSource.clip = audioItem;
+                break;
+            case "DIE":
+                audioSource.clip = audioDie;
+                break;
+            case "FINISH":
+                audioSource.clip = audioFinish;
+                break;
+        }
+        audioSource.Play();
     }
 }
