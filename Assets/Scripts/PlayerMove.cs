@@ -25,6 +25,8 @@ public class PlayerMove : MonoBehaviour
     private const int playerLayer = 10;
     private const int plyaerDamagedLayer = 11;
 
+    private Vector2 touchStartPos;
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -42,9 +44,7 @@ public class PlayerMove : MonoBehaviour
         //점프
         if (Input.GetButtonDown("Jump") && !animator.GetBool("isJumping"))
         {
-            rigid.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
-            animator.SetBool("isJumping", true);
-            PlaySound("JUMP");
+            PlayerJump();
         }
 
         // 손 땟을때 자동으로 멈추게
@@ -69,6 +69,73 @@ public class PlayerMove : MonoBehaviour
         {
             // 움직이고 있는 상태
             animator.SetBool("isWalking", true);
+        }
+
+        // 터치로 움직임
+        if (Input.touchCount > 0)
+        {
+            Touch touch = Input.GetTouch(0);
+            if (touch.position.x > Screen.width / 2)
+            {
+                // 플레이어 점프
+                // FIXME: 왼쪽이랑 코드가 중복됨
+                if (touch.phase == TouchPhase.Began)
+                {
+                    touchStartPos = touch.position;
+                }
+                else if (touch.phase == TouchPhase.Ended)
+                {
+                    Vector2 touchEndPos = touch.position;
+                    float swipeDistance = (touchEndPos - touchStartPos).magnitude;
+                    Debug.Log(swipeDistance);
+                    if (swipeDistance > 50)
+                    {
+                        if (!animator.GetBool("isJumping"))
+                        {
+                            PlayerJump();
+                        }
+                    }
+                }
+                if (
+                    touch.phase == TouchPhase.Began
+                    || touch.phase == TouchPhase.Moved
+                    || touch.phase == TouchPhase.Stationary
+                )
+                {
+                    Debug.Log("Right side of screen");
+                    rigid.AddForce(Vector2.right * 1.0f, ForceMode2D.Impulse);
+                }
+            }
+            else
+            {
+                // 플레이어 점프
+                if (touch.phase == TouchPhase.Began)
+                {
+                    touchStartPos = touch.position;
+                }
+                else if (touch.phase == TouchPhase.Ended)
+                {
+                    Vector2 touchEndPos = touch.position;
+                    float swipeDistance = (touchEndPos - touchStartPos).magnitude;
+                    Debug.Log(swipeDistance);
+                    if (swipeDistance > 50)
+                    {
+                        if (!animator.GetBool("isJumping"))
+                        {
+                            PlayerJump();
+                        }
+                    }
+                }
+                if (
+                    touch.phase == TouchPhase.Began
+                    || touch.phase == TouchPhase.Moved
+                    || touch.phase == TouchPhase.Stationary
+                )
+                {
+                    Debug.Log("Left side of screen");
+                    rigid.AddForce(Vector2.left * 1.0f, ForceMode2D.Impulse);
+                }
+            }
         }
     }
 
@@ -252,5 +319,12 @@ public class PlayerMove : MonoBehaviour
                 break;
         }
         audioSource.Play();
+    }
+
+    void PlayerJump()
+    {
+        rigid.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
+        animator.SetBool("isJumping", true);
+        PlaySound("JUMP");
     }
 }
