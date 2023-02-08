@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class PlayerMove : MonoBehaviour
 {
@@ -33,7 +32,6 @@ public class PlayerMove : MonoBehaviour
 
     void Awake()
     {
-        SceneManager.LoadScene(0);
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = 60;
 
@@ -143,10 +141,10 @@ public class PlayerMove : MonoBehaviour
 
         // Landing Platform
         // 하강시에만 Ray 발사
-        // if (rigid.velocity.y < 0.2f)
-        if (animator.GetBool("isJumping"))
+        // if (rigid.velocity.y < 0)
+        if (animator.GetBool("isJumping") && rigid.velocity.y < 0)
         {
-            Debug.DrawRay(rigid.position, Vector2.down * 3f, new Color(1, 0, 0));
+            Debug.DrawRay(rigid.position, Vector2.down * 1, new Color(1, 0, 0));
             RaycastHit2D rayHit = Physics2D.Raycast(
                 rigid.position,
                 Vector2.down,
@@ -156,7 +154,7 @@ public class PlayerMove : MonoBehaviour
             if (rayHit.collider != null)
             {
                 // Ray 는 Player 가운데서 나옴 , 플레이어 크기는 1
-                if (rayHit.distance < 0.6f)
+                if (rayHit.distance < 1f)
                 {
                     animator.SetBool("isJumping", false);
                 }
