@@ -5,8 +5,9 @@ using UnityEngine;
 public class FrameRateController : MonoBehaviour
 {
     // Start is called before the first frame update
-    void Awake()
+    void Start()
     {
+        QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = 60;
     }
 }

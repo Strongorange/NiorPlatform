@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerMove : MonoBehaviour
 {
@@ -28,8 +29,14 @@ public class PlayerMove : MonoBehaviour
     private Vector2 touchStartPos;
 
     // Start is called before the first frame update
+
+
     void Awake()
     {
+        SceneManager.LoadScene(0);
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = 60;
+
         rigid = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
@@ -48,7 +55,7 @@ public class PlayerMove : MonoBehaviour
         // }
 
         //
-        Debug.Log(animator.GetBool("isJumping"));
+
 
         // 터치로 움직임
         if (Input.touchCount > 0)
