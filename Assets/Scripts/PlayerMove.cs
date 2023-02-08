@@ -109,7 +109,7 @@ public class PlayerMove : MonoBehaviour
                     Vector2 touchEndPos = touch.position;
                     float swipeDistance = (touchEndPos - touchStartPos).magnitude;
 
-                    if (swipeDistance > 50)
+                    if (swipeDistance > 100)
                     {
                         if (!animator.GetBool("isJumping"))
                         {
@@ -143,8 +143,8 @@ public class PlayerMove : MonoBehaviour
 
         // Landing Platform
         // 하강시에만 Ray 발사
-        // TODO: 현재 모든 사황에서 Ray 발사
-        if (rigid.velocity.y < 0.2f)
+        // if (rigid.velocity.y < 0.2f)
+        if (animator.GetBool("isJumping"))
         {
             Debug.DrawRay(rigid.position, Vector2.down * 3f, new Color(1, 0, 0));
             RaycastHit2D rayHit = Physics2D.Raycast(
@@ -156,7 +156,7 @@ public class PlayerMove : MonoBehaviour
             if (rayHit.collider != null)
             {
                 // Ray 는 Player 가운데서 나옴 , 플레이어 크기는 1
-                if (rayHit.distance < 0.5f)
+                if (rayHit.distance < 0.6f)
                 {
                     animator.SetBool("isJumping", false);
                 }
