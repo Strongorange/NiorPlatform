@@ -46,14 +46,11 @@ public class PlayerMove : MonoBehaviour
     // 단발적인 일반적인 키 입력
     void Update()
     {
-        //점프, 키보드
-        // if (Input.GetButtonDown("Jump") && !animator.GetBool("isJumping"))
-        // {
-        //     PlayerJump();
-        // }
-
-        //
-
+        // 점프, 키보드
+        if (Input.GetButtonDown("Jump") && !animator.GetBool("isJumping"))
+        {
+            PlayerJump();
+        }
 
         // 터치로 움직임
         if (Input.touchCount > 0)
@@ -142,7 +139,7 @@ public class PlayerMove : MonoBehaviour
         // Landing Platform
         // 하강시에만 Ray 발사
         // if (rigid.velocity.y < 0)
-        if (animator.GetBool("isJumping") && rigid.velocity.y < 0)
+        if (animator.GetBool("isJumping") && rigid.velocity.y < 10)
         {
             Debug.DrawRay(rigid.position, Vector2.down * 1, new Color(1, 0, 0));
             RaycastHit2D rayHit = Physics2D.Raycast(
@@ -167,11 +164,11 @@ public class PlayerMove : MonoBehaviour
         //     rigid.velocity = new Vector2(rigid.velocity.normalized.x * 0.5f, rigid.velocity.y);
         // }
 
-        // 방향 전환
-        // if (Input.GetButton("Horizontal"))
-        // {
-        //     spriteRenderer.flipX = Input.GetAxisRaw("Horizontal") == -1;
-        // }
+        // 방향 전환, 키보드
+        if (Input.GetButton("Horizontal"))
+        {
+            spriteRenderer.flipX = Input.GetAxisRaw("Horizontal") == -1;
+        }
 
         // 애니메이션
         if (Mathf.Abs(rigid.velocity.x) < 0.3)
@@ -191,8 +188,8 @@ public class PlayerMove : MonoBehaviour
     {
         // 오른쪽 왼쪽 움직임 제어
         // 움직임 제어, 키보드
-        // float h = Input.GetAxisRaw("Horizontal");
-        // rigid.AddForce(Vector2.right * h, ForceMode2D.Impulse);
+        float h = Input.GetAxisRaw("Horizontal");
+        rigid.AddForce(Vector2.right * h, ForceMode2D.Impulse);
     }
 
     void OnCollisionEnter2D(Collision2D collision)
@@ -289,6 +286,12 @@ public class PlayerMove : MonoBehaviour
             gameManager.NextStage();
             // 사운드 재생
             PlaySound("FINISH");
+        }
+        else if (collision.gameObject.tag == "Heal")
+        {
+            gameManager.HealthUp();
+            collision.gameObject.SetActive(false);
+            PlaySound("ITEM");
         }
     }
 

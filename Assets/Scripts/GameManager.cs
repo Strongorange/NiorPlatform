@@ -13,17 +13,22 @@ public class GameManager : MonoBehaviour
     public int health;
 
     public PlayerMove player;
+
+    public CameraConfiner cameraConfiner;
     public GameObject[] Stages;
     public Image[] UIhealth;
     public TextMeshProUGUI UIPoint;
     public TextMeshProUGUI UIStage;
     public GameObject UIRestartBtn;
 
+    BoxCollider2D boxCollider;
+
     // Start is called before the first frame update
     void Awake()
     {
         health = 5;
         stageIndex = 0;
+        boxCollider = GetComponent<BoxCollider2D>();
     }
 
     // Update is called once per frame
@@ -43,6 +48,7 @@ public class GameManager : MonoBehaviour
             PlayerReposition();
             Debug.Log("다음 스테이지로");
             UIStage.text = "STAGE " + (stageIndex + 1);
+            RepositionGameManager(stageIndex);
         }
         else
         {
@@ -60,6 +66,8 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        cameraConfiner.SwitchConfiner(stageIndex);
+
         // 점수 계산
         totalPoint += stagePoint;
         stagePoint = 0;
@@ -76,6 +84,19 @@ public class GameManager : MonoBehaviour
             }
             // 체력 하락
             HealthDown();
+        }
+    }
+
+    public void HealthUp()
+    {
+        if (health >= 5)
+        {
+            return;
+        }
+        else
+        {
+            health++;
+            UIhealth[health - 1].color = new Color(1, 1, 1);
         }
     }
 
@@ -108,11 +129,48 @@ public class GameManager : MonoBehaviour
     public void Restart()
     {
         Time.timeScale = 1;
+        RepositionGameManager(0);
         SceneManager.LoadScene(0);
+        RepositionGameManager(0);
     }
 
     void ViewBtn()
     {
         UIRestartBtn.SetActive(true);
+    }
+
+    public void PlayerHeal()
+    {
+        if (health >= 5)
+        {
+            return;
+        }
+        else
+        {
+            health++;
+        }
+    }
+
+    void RepositionGameManager(int stageIdx)
+    {
+        float newOffset = 0;
+        switch (stageIdx)
+        {
+            case 0:
+                newOffset = 0;
+                break;
+            case 1:
+                newOffset = 0;
+                break;
+            case 2:
+                newOffset = -2;
+                break;
+            case 3:
+                newOffset = -32;
+                break;
+        }
+
+        Vector2 newOffsetVector = new Vector2(boxCollider.offset.x, newOffset);
+        boxCollider.offset = newOffsetVector;
     }
 }
