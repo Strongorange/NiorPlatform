@@ -67,6 +67,7 @@ public class GameManager : MonoBehaviour
         }
 
         cameraConfiner.SwitchConfiner(stageIndex);
+        HealthUp();
 
         // 점수 계산
         totalPoint += stagePoint;
